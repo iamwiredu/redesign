@@ -11,6 +11,7 @@ class LuxuryAnimations {
         this.setupIntersectionObserver();
         this.setupParallax();
         this.setupSmoothScrolling();
+        this.setupMobileCarousel();
     }
 
     setupScrollAnimations() {
@@ -106,6 +107,128 @@ class LuxuryAnimations {
             });
         });
     }
+
+    setupMobileCarousel() {
+        const carousel = document.querySelector('.mobile-carousel');
+        if (!carousel) return;
+
+        const slides = carousel.querySelectorAll('.carousel-slide');
+        const dots = carousel.querySelectorAll('.dot');
+        let currentSlide = 0;
+        let isAutoPlaying = true;
+        let autoPlayInterval;
+
+        // Auto-play functionality
+        const startAutoPlay = () => {
+            if (isAutoPlaying) {
+                autoPlayInterval = setInterval(() => {
+                    nextSlide();
+                }, 4000);
+            }
+        };
+
+        const stopAutoPlay = () => {
+            clearInterval(autoPlayInterval);
+        };
+
+        const goToSlide = (index) => {
+            // Remove active classes
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+
+            // Add prev class for smooth transition
+            if (index < currentSlide) {
+                slides[currentSlide].classList.add('prev');
+                setTimeout(() => {
+                    slides[currentSlide].classList.remove('prev');
+                }, 600);
+            }
+
+            currentSlide = index;
+
+            // Add active classes
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        };
+
+        const nextSlide = () => {
+            const next = (currentSlide + 1) % slides.length;
+            goToSlide(next);
+        };
+
+        const prevSlide = () => {
+            const prev = (currentSlide - 1 + slides.length) % slides.length;
+            goToSlide(prev);
+        };
+
+        // Dot navigation
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                stopAutoPlay();
+                goToSlide(index);
+                // Restart autoplay after user interaction
+                setTimeout(() => {
+                    isAutoPlaying = true;
+                    startAutoPlay();
+                }, 3000);
+            });
+        });
+
+        // Touch/swipe support
+        let startX = 0;
+        let startY = 0;
+        let endX = 0;
+        let endY = 0;
+
+        carousel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            stopAutoPlay();
+        }, { passive: true });
+
+        carousel.addEventListener('touchmove', (e) => {
+            endX = e.touches[0].clientX;
+            endY = e.touches[0].clientY;
+        }, { passive: true });
+
+        carousel.addEventListener('touchend', () => {
+            const deltaX = startX - endX;
+            const deltaY = startY - endY;
+
+            // Only trigger swipe if horizontal movement is greater than vertical
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                if (deltaX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+
+            // Restart autoplay after swipe
+            setTimeout(() => {
+                isAutoPlaying = true;
+                startAutoPlay();
+            }, 3000);
+        }, { passive: true });
+
+        // Pause autoplay when carousel is not visible
+        const carouselObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    isAutoPlaying = true;
+                    startAutoPlay();
+                } else {
+                    isAutoPlaying = false;
+                    stopAutoPlay();
+                }
+            });
+        });
+
+        carouselObserver.observe(carousel);
+
+        // Start autoplay
+        startAutoPlay();
+    }
 }
 
 // Image Loading and Optimization
@@ -156,6 +279,7 @@ class InteractiveElements {
         this.setupHoverEffects();
         this.setupFormInteractions();
         this.setupMenuInteractions();
+        this.setupTouchOptimizations();
     }
 
     setupHoverEffects() {
@@ -191,6 +315,20 @@ class InteractiveElements {
                 if (img) img.style.transform = 'scale(1)';
             });
         });
+    }
+
+    setupTouchOptimizations() {
+        // For touch devices, show overlays by default
+        if ('ontouchstart' in window) {
+            const collectionItems = document.querySelectorAll('.collection-item');
+            collectionItems.forEach(item => {
+                const overlay = item.querySelector('.item-overlay');
+                const info = item.querySelector('.item-info');
+                
+                if (overlay) overlay.style.opacity = '1';
+                if (info) info.style.transform = 'translateY(0)';
+            });
+        }
     }
 
     setupFormInteractions() {
@@ -265,6 +403,7 @@ class PerformanceOptimizer {
     init() {
         this.optimizeScrollPerformance();
         this.setupResizeHandler();
+        this.setupReducedMotion();
     }
 
     optimizeScrollPerformance() {
@@ -295,6 +434,25 @@ class PerformanceOptimizer {
                 window.dispatchEvent(new Event('scroll'));
             }, 250);
         });
+    }
+
+    setupReducedMotion() {
+        // Respect user's motion preferences
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        
+        if (prefersReducedMotion.matches) {
+            document.body.classList.add('reduced-motion');
+            // Disable animations for users who prefer reduced motion
+            const style = document.createElement('style');
+            style.textContent = `
+                .reduced-motion * {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 }
 
