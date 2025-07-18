@@ -57,6 +57,7 @@ body {
     top: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
+    margin-top: 20px;
 }
 
 .logo-circle {
@@ -71,11 +72,10 @@ body {
     backdrop-filter: blur(4px);
 }
 
-.logo-dot {
+.logo-circle img {
     width: 24px;
     height: 24px;
-    background: white;
-    border-radius: 50%;
+    filter: brightness(0) invert(1);
 }
 
 .brand-name {
@@ -113,14 +113,30 @@ body {
     color: white;
 }
 
-/* Floating Animation */
+/* Floating Animation - More subtle for mobile */
 .floating {
-    animation: float 6s ease-in-out infinite;
+    animation: float 8s ease-in-out infinite;
 }
 
 @keyframes float {
-    0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
-    50% { transform: translate(-50%, -50%) translateY(-10px); }
+    0%, 100% { 
+        transform: translate(-50%, -50%) translateY(0px); 
+    }
+    50% { 
+        transform: translate(-50%, -50%) translateY(-5px); 
+    }
+}
+
+/* Mobile floating adjustment */
+@media (max-width: 768px) {
+    @keyframes float {
+        0%, 100% { 
+            transform: translate(-50%, -50%) translateY(0px); 
+        }
+        50% { 
+            transform: translate(-50%, -50%) translateY(-3px); 
+        }
+    }
 }
 
 /* Hero Section */
@@ -403,6 +419,12 @@ body {
     padding: 80px 0;
 }
 
+/* Hide Mobile Carousel - Always use desktop grid */
+.mobile-carousel {
+    display: none;
+}
+
+/* Desktop Gallery Grid - Always visible */
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -591,19 +613,25 @@ body {
     transform: scale(1.1);
 }
 
-/* Responsive Design */
+/* Responsive Design - Mobile adjustments while keeping desktop layout */
 @media (max-width: 768px) {
     .header-right .social-links {
         display: none;
     }
     
+    /* Keep desktop grid but make it more mobile-friendly */
     .collection-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
     }
     
     .large-item {
-        grid-column: span 1;
+        grid-column: span 2;
         grid-row: span 1;
+    }
+    
+    .large-item .item-image {
+        aspect-ratio: 16/9;
     }
     
     .split-section {
@@ -614,8 +642,10 @@ body {
         height: 400px;
     }
     
+    /* Keep desktop gallery grid on mobile */
     .gallery-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
     
     .large-gallery-item {
@@ -631,14 +661,56 @@ body {
         flex-direction: column;
         text-align: center;
     }
+    
+    .section-header {
+        margin-bottom: 40px;
+    }
+    
+    .featured-collection,
+    .lifestyle-gallery {
+        padding: 60px 0;
+    }
+    
+    /* Show overlays on mobile for better UX */
+    .collection-item .item-overlay {
+        opacity: 1;
+    }
+    
+    .collection-item .item-info {
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 480px) {
-    .gallery-grid {
-        grid-template-columns: 1fr;
+    .container {
+        padding: 0 16px;
     }
     
-    .large-gallery-item {
-        grid-column: span 1;
+    .header {
+        padding: 24px 16px;
+    }
+    
+    .split-item {
+        height: 300px;
+    }
+    
+    .newsletter {
+        padding: 80px 0;
+    }
+    
+}
+
+/* Touch-friendly improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+    .collection-item .item-overlay {
+        opacity: 1;
+    }
+    
+    .collection-item .item-info {
+        transform: translateY(0);
+    }
+    
+    .image-reveal:hover img {
+        transform: none;
     }
 }
